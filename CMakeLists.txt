@@ -19,7 +19,7 @@ add_executable(nitv
   src/sicd_xml.cpp
 )
 
-target_include_directories(nitv PRIVATE src third_party/argparse)
+target_include_directories(nitv PRIVATE src external/argparse)
 target_link_libraries(nitv PRIVATE ZLIB::ZLIB)
 
 target_compile_options(nitv PRIVATE -Wall -Wextra)
