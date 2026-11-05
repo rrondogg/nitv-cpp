@@ -29,3 +29,5 @@ venv/
 .clangd/
 .DS_Store
 Thumbs.db
+*.nitf
+*.ntf
