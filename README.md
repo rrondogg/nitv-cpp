@@ -15,6 +15,10 @@ address it as one logical image
 resample to the requested output size
 write a PNG
 
+Current quality is terrible but this is it:
+![alt text](image.png)
+
+
 ## Not supported
 
 Compression of any kind, block masks (`IC` = `NM`/`M*`), pixel sizes other
