@@ -16,8 +16,7 @@ resample to the requested output size
 write a PNG
 
 Current quality is terrible but this is it:
-![alt text](image.png)
-
+![this should load from sample-pngs](sample-pngs/2025-2-UMBRA_SICD.png)
 
 ## Not supported
 
