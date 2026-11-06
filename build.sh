@@ -24,5 +24,5 @@ if [ "$CLEAN" -eq 1 ]; then
 fi
 
 cmake -S . -B build
-cmake --build build
+cmake --build build -j 8
 
