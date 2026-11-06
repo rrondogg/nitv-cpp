@@ -17,7 +17,7 @@ write a PNG
 
 ## Not supported
 
-Compression of any kind, block masks (`IC` = `NM`/`M*`), bit depths other than
-8 (and 64 for SICD complex), `IMODE` other than `P` for RGB, blocked SICD
-(`IMODE=B`), images split along columns rather than rows, and SICD stored as
-`AMP8I_PHS8I`.
+Compression of any kind, block masks (`IC` = `NM`/`M*`), pixel sizes other
+than 1 byte for MONO / 3 for RGB / 8 for SICD, `IMODE` other than `P` for RGB,
+blocked SICD (`IMODE=B`), images split along columns rather than rows, and
+SICD stored as `AMP8I_PHS8I`.

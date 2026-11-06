@@ -57,8 +57,23 @@ struct Options {
     bool open_when_done = false;
 };
 
+// NBPP is bits per pixel PER BAND, so a SICD storing I and Q as two 32-bit
+// real bands is 2 * 32 / 8 = 8 bytes 
+static std::size_t header_bytes_per_pixel(const ImageHeader &header) {
+    const std::size_t bits =
+        static_cast<std::size_t>(header.nbpp) * header.bands.size();
+    if (bits % 8 != 0) {
+        throw std::runtime_error(
+            "NBPP=" + std::to_string(header.nbpp) + " across " +
+            std::to_string(header.bands.size()) +
+            " band(s) is not a whole number of bytes per pixel");
+    }
+    return bits / 8;
+}
+
 // Refuse the cases we silently get wrong rather than producing noise
-static void check_supported(const ImageHeader &header, int expected_nbpp) {
+static void check_supported(const ImageHeader &header,
+                            std::size_t expected_bytes_per_pixel) {
     if (header.ic != "NC") {
         throw std::runtime_error(
             "image compression IC=\"" + header.ic +
@@ -66,11 +81,13 @@ static void check_supported(const ImageHeader &header, int expected_nbpp) {
             "mask). Compressed and masked data would be read as raw pixels "
             "and come out as noise.");
     }
-    if (header.nbpp != expected_nbpp) {
+    const std::size_t actual = header_bytes_per_pixel(header);
+    if (actual != expected_bytes_per_pixel) {
         throw std::runtime_error(
-            "NBPP=" + std::to_string(header.nbpp) + " is not supported here; " +
-            "this path expects " + std::to_string(expected_nbpp) +
-            " bits per pixel");
+            "this path needs " + std::to_string(expected_bytes_per_pixel) +
+            " byte(s) per pixel but the header describes " +
+            std::to_string(actual) + " (NBPP=" + std::to_string(header.nbpp) +
+            " across " + std::to_string(header.bands.size()) + " band(s))");
     }
     if (header.nrows == 0 || header.ncols == 0) {
         throw std::runtime_error("image segment reports 0 rows or 0 columns");
@@ -130,7 +147,7 @@ static std::string make_mono(FileReader &reader, const Nitf &nitf,
     // single band
 
 
-    check_supported(nitf.image_segments.front().header, 8);
+    check_supported(nitf.image_segments.front().header, sizeof(uint8_t));
 
     std::vector<MmapFile> maps;
     const SegmentStack<uint8_t> stack =
@@ -160,7 +177,7 @@ static std::string make_rgb(FileReader &reader, const Nitf &nitf,
                             const Options &options,
                             const std::string &input_path) {
     const ImageHeader &first = nitf.image_segments.front().header;
-    check_supported(first, 8);
+    check_supported(first, sizeof(Rgb8));
 
     // IMODE P means the three bands for one pixel sit next to each other
     // (R,G,B,R,G,B,...), which is what the 3-byte Rgb8 layout assumes.
@@ -289,12 +306,17 @@ static std::string make_sicd(FileReader &reader, const Nitf &nitf,
                              const std::vector<uint8_t> &xml) {
     const ImageHeader &first = nitf.image_segments.front().header;
 
-    // 64 bits per pixel: a 32-bit real part and a 32-bit imaginary part.
-    check_supported(first, 64);
-    if (first.pvtype != PixelValueType::C) {
+    // 8 bytes per pixel: a 32-bit real part then a 32-bit imaginary part.
+    check_supported(first, sizeof(Complex32BE));
+
+    // Real products store I and Q as two 32-bit real bands (PVTYPE=R,
+    // NBPP=32, NBANDS=2). The standard also permits a single complex band
+    // (PVTYPE=C, NBPP=64). Both are 8 bytes per pixel, I before Q.
+    if (first.pvtype != PixelValueType::R &&
+        first.pvtype != PixelValueType::C) {
         throw std::runtime_error(
-            std::string("SICD images are expected to have PVTYPE=C "
-                        "(complex float); this file has PVTYPE=") +
+            std::string("SICD pixels must be a real I/Q band pair or a "
+                        "complex band; this file has PVTYPE=") +
             pixel_value_type_name(first.pvtype));
     }
     if (first.imode == ImageMode::B) {
