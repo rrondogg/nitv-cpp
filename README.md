@@ -9,10 +9,15 @@ For now its just an image viewer but maybe this can be branched out further (bet
 Loosely the flow is:
 
 parse the NITF headers
+
 decide what kind of picture this is
+
 memory-map each image segment's pixel data
+
 address it as one logical image
+
 resample to the requested output size
+
 write a PNG
 
 Current quality is terrible but this is it:
