@@ -15,7 +15,7 @@ tools/
 out/
 badout/
 baddata/
-*.png
+out/
 __pycache__/
 *.py[cod]
 .venv/
