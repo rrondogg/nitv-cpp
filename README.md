@@ -6,19 +6,23 @@ Inspired by [nitf-viz](https://github.com/holmesv3/nitf-viz) but I don't know Ru
 
 For now its just an image viewer but maybe this can be branched out further (better image viewer? maybe throw in a processor here? something cool?)
 
+Building via the script `build.sh` is the easiest way to install. Its very naive but this is small so it won't matter that much.
+
+You can run it like `nitv some_sicd.nitf --output . --size 1024`
+
 Loosely the flow is:
 
-parse the NITF headers
+1. parse the NITF headers
 
-decide what kind of picture this is
+2. decide what kind of picture this is
 
-memory-map each image segment's pixel data
+3. memory-map each image segment's pixel data
 
-address it as one logical image
+4. address it as one logical image
 
-resample to the requested output size
+5. resample to the requested output size
 
-write a PNG
+6. write a PNG
 
 Current quality is terrible but this is it:
 ![this should load from sample-pngs](sample-pngs/2025-2-UMBRA_SICD.png)
